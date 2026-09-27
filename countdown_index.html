@@ -1,0 +1,390 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>宇宙カウントダウン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+:root{
+  color-scheme: dark;
+  --void:#060812;
+  --ink:#EEF1FA;
+  --muted:#8C94AE;
+  --line:rgba(200,210,240,.16);
+  --panel:rgba(10,14,28,.62);
+  --gold:#F2C46D;
+  --ok:#7FD8B6;
+  --warn:#F0A36B;
+  --f-num:"Chakra Petch", "SF Mono", ui-monospace, monospace;
+  --f-jp:"Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+}
+html,body{height:100%}
+body{
+  background:var(--void);
+  color:var(--ink);
+  font-family:var(--f-jp);
+  font-size:15px;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+#sky{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+.wrap{
+  position:relative;z-index:1;
+  min-height:100%;
+  box-sizing:border-box;
+  padding-inline:16px;
+  padding-block:48px 40px;
+  display:flex;flex-direction:column;align-items:center;gap:40px;
+}
+header{text-align:center;display:flex;flex-direction:column;gap:10px;max-width:40rem}
+.eyebrow{
+  font-family:var(--f-num);font-size:12px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+}
+h1{
+  margin:0;font-weight:700;font-size:clamp(22px,4.2vw,34px);letter-spacing:.04em;text-wrap:balance;
+}
+.target-line{color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums}
+
+.clock{
+  display:grid;grid-template-columns:repeat(4,auto);align-items:end;justify-content:center;
+  gap:clamp(10px,3vw,36px);
+}
+.unit{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.num{
+  font-family:var(--f-num);font-weight:600;
+  font-size:clamp(52px,12vw,148px);line-height:.95;
+  font-variant-numeric:tabular-nums;letter-spacing:.02em;
+  text-shadow:0 0 28px rgba(160,190,255,.25);
+}
+.lab{font-size:13px;letter-spacing:.2em;color:var(--muted)}
+.unit.sec .num{color:var(--gold);text-shadow:0 0 28px rgba(242,196,109,.28)}
+.total{
+  font-size:15px;color:var(--ink);text-align:center;font-variant-numeric:tabular-nums;
+  margin-top:-16px;
+}
+.total b{font-family:var(--f-num);font-weight:600;font-size:22px;margin-inline:2px}
+.arrived{
+  font-family:var(--f-num);font-weight:600;font-size:clamp(40px,9vw,96px);color:var(--gold);letter-spacing:.08em;
+  text-shadow:0 0 40px rgba(242,196,109,.45);
+}
+
+.status{
+  display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:center;align-items:center;
+  font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;
+}
+.pill{display:inline-flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted);box-shadow:0 0 8px currentColor}
+.dot.ok{background:var(--ok);color:var(--ok)}
+.dot.warn{background:var(--warn);color:var(--warn)}
+.now{font-family:var(--f-num);color:var(--ink);font-size:14px}
+button.link{
+  background:none;border:0;color:var(--muted);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:0;
+}
+button.link:hover{color:var(--ink)}
+
+form{
+  width:100%;max-width:36rem;box-sizing:border-box;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:20px;display:flex;flex-direction:column;gap:16px;
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+.form-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.form-head h2{margin:0;font-size:15px;font-weight:700;letter-spacing:.06em}
+.form-head span{font-size:12px;color:var(--muted)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field.full{grid-column:1/-1}
+label{font-size:12px;color:var(--muted);letter-spacing:.08em}
+input{
+  width:100%;box-sizing:border-box;min-width:0;
+  background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:8px;
+  color:var(--ink);font:inherit;font-size:16px;padding:10px 12px;
+  font-variant-numeric:tabular-nums;
+}
+input:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.submit{
+  justify-self:start;background:var(--gold);color:#1A1406;border:0;border-radius:8px;
+  font:inherit;font-weight:700;font-size:15px;padding:10px 20px;cursor:pointer;letter-spacing:.06em;
+}
+.submit:hover{filter:brightness(1.08)}
+.actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.msg{font-size:13px;color:var(--ok)}
+
+@media (max-width:560px){
+  .clock{grid-template-columns:repeat(2,auto);row-gap:22px}
+  .num{font-size:clamp(56px,20vw,96px)}
+  .row{grid-template-columns:1fr}
+  .wrap{padding-block:32px 32px;gap:32px}
+}
+@media (prefers-reduced-motion:reduce){ .num{transition:none} }
+</style>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+
+<main class="wrap">
+  <header>
+    <div class="eyebrow">T-minus</div>
+    <h1 id="title">イベント開始まで</h1>
+    <div class="target-line" id="targetLine">—</div>
+  </header>
+
+  <section aria-live="polite" aria-atomic="true" id="clockArea">
+    <div class="clock" id="clock">
+      <div class="unit"><div class="num" id="d">--</div><div class="lab">日</div></div>
+      <div class="unit"><div class="num" id="h">--</div><div class="lab">時間</div></div>
+      <div class="unit"><div class="num" id="m">--</div><div class="lab">分</div></div>
+      <div class="unit sec"><div class="num" id="s">--</div><div class="lab">秒</div></div>
+    </div>
+    <div class="arrived" id="arrived" hidden>ARRIVED</div>
+  </section>
+
+  <div class="total" id="total">あと <b id="th">--</b>時間 <b id="tm">--</b>分</div>
+
+  <div class="status">
+    <span class="pill"><span class="dot" id="syncDot"></span><span id="syncText">Web時刻を取得中…</span></span>
+    <span>現在（日本時間） <span class="now" id="now">--:--:--</span></span>
+    <button type="button" class="link" id="resync">再同期</button>
+  </div>
+
+  <form id="form" autocomplete="off">
+    <div class="form-head">
+      <h2>期限を設定</h2>
+      <span>日本時間（JST）で指定</span>
+    </div>
+    <div class="row">
+      <div class="field full">
+        <label for="inTitle">タイトル</label>
+        <input id="inTitle" type="text" maxlength="60" placeholder="例：GGA 開演まで">
+      </div>
+      <div class="field">
+        <label for="inDate">日付</label>
+        <input id="inDate" type="date" required>
+      </div>
+      <div class="field">
+        <label for="inTime">時刻</label>
+        <input id="inTime" type="time" step="1" required>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="submit">カウントダウン開始</button>
+      <span class="msg" id="msg" role="status"></span>
+    </div>
+  </form>
+</main>
+
+<script>
+(() => {
+  // ───────── 時刻同期 ─────────
+  // サーバーが返す HTTP Date ヘッダー（秒精度）を複数回サンプリングし、
+  // 往復時間を考慮して「端末時計とのずれ」を区間で絞り込む。
+  let offset = 0;          // serverTime = Date.now() + offset
+  let synced = false;
+  const $ = id => document.getElementById(id);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function sample(){
+    const s = Date.now();
+    const res = await fetch(location.href.split('#')[0], {method:'HEAD', cache:'no-store'});
+    const r = Date.now();
+    const h = res.headers.get('date');
+    if(!h) throw new Error('no date');
+    const D = Date.parse(h);
+    if(isNaN(D)) throw new Error('bad date');
+    // サーバー時刻 ∈ [D, D+1000) が、端末時刻 [s, r] のどこかで生成された
+    return {lo: D - r, hi: D + 1000 - s};
+  }
+
+  async function sync(){
+    $('syncDot').className = 'dot';
+    $('syncText').textContent = 'Web時刻を取得中…';
+    let lo = -Infinity, hi = Infinity, n = 0;
+    for(let i=0;i<6;i++){
+      try{
+        const b = await sample();
+        const nlo = Math.max(lo,b.lo), nhi = Math.min(hi,b.hi);
+        if(nlo <= nhi){ lo = nlo; hi = nhi; }
+        n++;
+      }catch(e){}
+      await sleep(170 + i*23);
+    }
+    if(n === 0){
+      synced = false; offset = 0;
+      $('syncDot').className = 'dot warn';
+      $('syncText').textContent = 'Web時刻を取得できないため端末の時計で表示中';
+      return;
+    }
+    offset = Math.round((lo + hi) / 2);
+    synced = true;
+    const err = Math.round((hi - lo) / 2);
+    const diff = (offset/1000).toFixed(1);
+    $('syncDot').className = 'dot ok';
+    $('syncText').textContent = `Web時刻と同期済み（端末とのずれ ${diff > 0 ? '+' : ''}${diff}秒・誤差±${(err/1000).toFixed(2)}秒）`;
+  }
+  const serverNow = () => Date.now() + offset;
+
+  // ───────── 期限の管理（日本時間で解釈） ─────────
+  const JST = 9 * 3600 * 1000;
+  const pad = n => String(n).padStart(2,'0');
+  function jstParts(ms){
+    const d = new Date(ms + JST);
+    return {Y:d.getUTCFullYear(), M:d.getUTCMonth()+1, D:d.getUTCDate(), h:d.getUTCHours(), m:d.getUTCMinutes(), s:d.getUTCSeconds(), w:'日月火水木金土'[d.getUTCDay()]};
+  }
+  function fromInputs(date, time){
+    const [Y,M,D] = date.split('-').map(Number);
+    const [h,m,s=0] = time.split(':').map(Number);
+    return Date.UTC(Y, M-1, D, h, m, s) - JST;
+  }
+
+  const store = {
+    get(){ try{ return JSON.parse(localStorage.getItem('space-countdown')||'null'); }catch(e){ return null; } },
+    set(v){ try{ localStorage.setItem('space-countdown', JSON.stringify(v)); }catch(e){} }
+  };
+
+  // 初期値：保存がなければ例として「2027年 元日」
+  let state = store.get() || { title:'2027年まで', target: Date.UTC(2027,0,1,0,0,0) - JST };
+
+  function applyState(){
+    $('title').textContent = state.title || 'カウントダウン';
+    const p = jstParts(state.target);
+    $('targetLine').textContent = `${p.Y}年${p.M}月${p.D}日（${p.w}） ${pad(p.h)}:${pad(p.m)}:${pad(p.s)} JST`;
+    $('inTitle').value = state.title || '';
+    $('inDate').value = `${p.Y}-${pad(p.M)}-${pad(p.D)}`;
+    $('inTime').value = `${pad(p.h)}:${pad(p.m)}:${pad(p.s)}`;
+    render();
+  }
+
+  // ───────── 表示 ─────────
+  function render(){
+    const now = serverNow();
+    const n = jstParts(now);
+    $('now').textContent = `${n.Y}/${pad(n.M)}/${pad(n.D)} ${pad(n.h)}:${pad(n.m)}:${pad(n.s)}`;
+
+    let left = Math.ceil((state.target - now) / 1000); // 残り秒
+    if(left <= 0){
+      $('clock').hidden = true; $('arrived').hidden = false;
+      $('th').textContent = '0'; $('tm').textContent = '00';
+      return;
+    }
+    $('clock').hidden = false; $('arrived').hidden = true;
+    const d = Math.floor(left / 86400);
+    const h = Math.floor(left % 86400 / 3600);
+    const m = Math.floor(left % 3600 / 60);
+    const s = left % 60;
+    $('d').textContent = d;
+    $('h').textContent = pad(h);
+    $('m').textContent = pad(m);
+    $('s').textContent = pad(s);
+    $('th').textContent = Math.floor(left / 3600).toLocaleString('ja-JP');
+    $('tm').textContent = pad(m);
+  }
+
+  // 補正後の時刻で「秒の変わり目」に合わせて更新
+  function loop(){
+    render();
+    const ms = serverNow() % 1000;
+    setTimeout(loop, 1000 - ms + 5);
+  }
+
+  $('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const date = $('inDate').value, time = $('inTime').value;
+    if(!date || !time){ $('msg').textContent = '日付と時刻を入力してください'; return; }
+    state = { title: $('inTitle').value.trim(), target: fromInputs(date, time) };
+    store.set(state);
+    applyState();
+    $('msg').textContent = state.target <= serverNow() ? 'この日時はすでに過ぎています' : '設定しました';
+    setTimeout(() => $('msg').textContent = '', 2600);
+  });
+  $('resync').addEventListener('click', sync);
+  document.addEventListener('visibilitychange', () => { if(!document.hidden) sync(); });
+
+  applyState();
+  loop();
+  sync();
+  setInterval(sync, 10 * 60 * 1000);
+
+  // ───────── 宇宙背景 ─────────
+  const cv = $('sky'), cx = cv.getContext('2d');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W, H, DPR, stars = [], nebula, shoot = null;
+
+  function makeNebula(){
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const blobs = [
+      {x:.18,y:.28,r:.55,c:'rgba(40,92,120,0.28)'},
+      {x:.82,y:.72,r:.6,c:'rgba(110,52,78,0.22)'},
+      {x:.6,y:.18,r:.4,c:'rgba(70,60,130,0.18)'},
+      {x:.35,y:.85,r:.45,c:'rgba(30,70,90,0.18)'}
+    ];
+    for(const b of blobs){
+      const R = b.r * Math.max(W,H);
+      const gr = g.createRadialGradient(b.x*W,b.y*H,0,b.x*W,b.y*H,R);
+      gr.addColorStop(0,b.c); gr.addColorStop(1,'rgba(0,0,0,0)');
+      g.fillStyle = gr; g.fillRect(0,0,W,H);
+    }
+    // 天の川風の帯
+    g.save(); g.translate(W/2,H/2); g.rotate(-0.42);
+    const band = g.createLinearGradient(0,-H*.22,0,H*.22);
+    band.addColorStop(0,'rgba(0,0,0,0)'); band.addColorStop(.5,'rgba(170,180,220,0.07)'); band.addColorStop(1,'rgba(0,0,0,0)');
+    g.fillStyle = band; g.fillRect(-W*1.5,-H*.22,W*3,H*.44);
+    g.restore();
+    return c;
+  }
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.width = Math.floor(innerWidth * DPR);
+    H = cv.height = Math.floor(innerHeight * DPR);
+    const count = Math.floor(innerWidth * innerHeight / 1400);
+    stars = Array.from({length:count}, () => {
+      const layer = Math.random();
+      return {
+        x: Math.random()*W, y: Math.random()*H,
+        r: (layer < .85 ? Math.random()*.9+.3 : Math.random()*1.4+1) * DPR,
+        a: Math.random()*.6+.3,
+        tw: Math.random()*2*Math.PI, ts: Math.random()*1.5+.4,
+        v: (layer*0.06+0.01) * DPR,
+        hue: Math.random() < .12 ? (Math.random()<.5 ? '255,214,170' : '170,200,255') : '240,244,255'
+      };
+    });
+    nebula = makeNebula();
+    draw(0);
+  }
+
+  function draw(t){
+    cx.fillStyle = '#060812'; cx.fillRect(0,0,W,H);
+    cx.drawImage(nebula,0,0);
+    for(const s of stars){
+      if(!reduce){ s.x -= s.v; if(s.x < -2) s.x = W + 2; }
+      const a = reduce ? s.a : s.a * (0.65 + 0.35*Math.sin(t/1000*s.ts + s.tw));
+      cx.fillStyle = `rgba(${s.hue},${a})`;
+      cx.beginPath(); cx.arc(s.x,s.y,s.r,0,Math.PI*2); cx.fill();
+      if(s.r > 1.6*DPR){
+        cx.fillStyle = `rgba(${s.hue},${a*.12})`;
+        cx.beginPath(); cx.arc(s.x,s.y,s.r*3.5,0,Math.PI*2); cx.fill();
+      }
+    }
+    if(!reduce){
+      if(!shoot && Math.random() < 0.004){
+        shoot = {x:Math.random()*W*.8+W*.2, y:Math.random()*H*.4, vx:-(6+Math.random()*4)*DPR, vy:(2.5+Math.random()*2)*DPR, life:1};
+      }
+      if(shoot){
+        const {x,y,vx,vy,life} = shoot;
+        const gr = cx.createLinearGradient(x,y,x-vx*14,y-vy*14);
+        gr.addColorStop(0,`rgba(255,255,255,${.85*life})`); gr.addColorStop(1,'rgba(255,255,255,0)');
+        cx.strokeStyle = gr; cx.lineWidth = 1.4*DPR;
+        cx.beginPath(); cx.moveTo(x,y); cx.lineTo(x-vx*14,y-vy*14); cx.stroke();
+        shoot.x += vx; shoot.y += vy; shoot.life -= 0.018;
+        if(shoot.life <= 0) shoot = null;
+      }
+    }
+  }
+
+  function frame(t){ draw(t); requestAnimationFrame(frame); }
+  addEventListener('resize', resize);
+  resize();
+  if(!reduce) requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
